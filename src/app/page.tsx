@@ -1,11 +1,11 @@
 "use client";
-import { useState } from "react";
 import PRODUCTS from "@/data/products";
+import { useState } from "react";
 
-function ProductCategoryRow({ category }: any) {
+function ProductCategoryRow({ category }: { category: string }) {
   return (
     <tr>
-      <th colSpan={2}>{category}</th>
+      <th>{category}</th>
     </tr>
   );
 }
@@ -14,9 +14,8 @@ function ProductRow({ product }: any) {
   const name = product.stocked ? (
     product.name
   ) : (
-    <span className="text-red-800">{product.name}</span>
+    <span className="text-red-600">{product.name}</span>
   );
-
   return (
     <tr>
       <td>{name}</td>
@@ -25,20 +24,19 @@ function ProductRow({ product }: any) {
   );
 }
 
-function ProductTable({ products }: any) {
-  const rows: any = [];
-  let lastCategory: any = null;
+function ProductTable({ products, filterText, inStockOnly }: any) {
+  let rows: any = [];
+  let lastCategory: string | null = null;
 
   products.forEach((product: any) => {
+    // if ()
+
     if (product.category !== lastCategory) {
-      rows.push(
-        <ProductCategoryRow
-          category={product.category}
-          key={product.category}
-        />
-      );
+      rows.push(<ProductCategoryRow category={product.category} />);
     }
+
     rows.push(<ProductRow product={product} key={product.name} />);
+
     lastCategory = product.category;
   });
 
@@ -55,22 +53,54 @@ function ProductTable({ products }: any) {
   );
 }
 
-function SearchBar() {
+function SearchBar({
+  filterText,
+  inStockOnly,
+  onFilterTextChange,
+  onInStockOnlyChange,
+}: any) {
   return (
-    <form>
-      <input type="string" placeholder="Search product" />
-      <label>
-        <input type="checkbox" /> Only show products in stock
-      </label>
-    </form>
+    <div>
+      <input
+        type="text"
+        placeholder="Search product"
+        onChange={(e: any) => onFilterTextChange(e.target.value)}
+      />
+      <div>
+        <label>
+          <input
+            type="checkbox"
+            checked={inStockOnly}
+            onChange={(e: any) => onInStockOnlyChange(e.target.checked)}
+          />
+          Only show products in stock
+        </label>
+      </div>
+    </div>
   );
 }
 
-export default function FilterableProductTable() {
+function FilterableProductTable({ products }: any) {
+  const [filterText, setFilterText] = useState<string>("");
+  const [inStockOnly, setInStockOnly] = useState<boolean>(false);
+
   return (
-    <>
-      <SearchBar />
-      <ProductTable products={PRODUCTS} />
-    </>
+    <div>
+      <SearchBar
+        filterText={filterText}
+        inStockOnly={inStockOnly}
+        onFilterTextChange={setFilterText}
+        onInStockOnlyChange={setInStockOnly}
+      />
+      <ProductTable
+        products={products}
+        filterText={filterText}
+        inStockOnly={inStockOnly}
+      />
+    </div>
   );
+}
+
+export default function App() {
+  return <FilterableProductTable products={PRODUCTS} />;
 }
